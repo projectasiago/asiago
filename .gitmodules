@@ -1,3 +1,3 @@
 [submodule "aura"]
 	path = aura
-	url = ./aura
+	url = git@github.com:projectasiago/aura.git
