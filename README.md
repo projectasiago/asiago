@@ -11,11 +11,6 @@
 $ git clone --recurse-submodules git@github.com:projectasiago/asiago.git
 ```
 
-## Building (you may skip this step)
-```
-$ make
-```
-
 ## Running
 ```
 $ make run-aura
