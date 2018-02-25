@@ -8,4 +8,8 @@ title: Mish
 
 [GitHub](https://github.com/projectasiago/mish)
 
-Mish!
+Mish is one of the key parts of Project Asiago.
+
+### Syntax
+
+[main](./mish/syntax)
