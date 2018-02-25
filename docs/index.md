@@ -1,3 +1,5 @@
-# Project Asiago
+---
+title: Asiago
+---
 
 Hello, World!
