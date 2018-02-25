@@ -2,7 +2,7 @@
 title: Mish
 ---
 
-[back](./)
+[back](../)
 
 ## Mish
 
