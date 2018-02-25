@@ -6,10 +6,10 @@ pull:
 
 .PHONY:
 aura: empty
-	make -C aura img-docker
+	make -C aura
 
 .PHONY:
-run-aura: aura/build/boot.img
+run-aura: aura
 	qemu-system-x86_64 -enable-kvm -net none -m 1024 -bios aura/ovmf.fd -usb -usbdevice disk::aura/build/boot.img
 
 .PHONY:
