@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/asiago.iml" filepath="$PROJECT_DIR$/asiago.iml" />
       <module fileurl="file://$PROJECT_DIR$/aura/aura.iml" filepath="$PROJECT_DIR$/aura/aura.iml" />
+      <module fileurl="file://$PROJECT_DIR$/feta/feta.iml" filepath="$PROJECT_DIR$/feta/feta.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mish/mish.iml" filepath="$PROJECT_DIR$/mish/mish.iml" />
     </modules>
   </component>
 </project>

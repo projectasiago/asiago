@@ -3,5 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/aura" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/feta" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/mish" vcs="Git" />
   </component>
 </project>

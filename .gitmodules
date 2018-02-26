@@ -1,3 +1,11 @@
 [submodule "aura"]
 	path = aura
 	url = https://github.com/projectasiago/aura.git
+
+[submodule "mish"]
+	path = mish
+	url = https://github.com/projectasiago/mish.git
+
+[submodule "feta"]
+	path = feta
+	url = https://github.com/projectasiago/feta.git
