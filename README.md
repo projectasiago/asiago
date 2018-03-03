@@ -15,11 +15,11 @@ $ git clone --recurse-submodules git@github.com:projectasiago/asiago.git
 
 The easiest way to build is to build inside the Docker image. To enter this image, run this command:
 ```
-$ make buildenv
+$ cd buildenv && make linux
 ```
 Once inside the container, you can build like so:
 ```
-$ make aura
+$ make mish-linux
 ```
 
 ## Running

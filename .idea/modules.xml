@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/aura/aura.iml" filepath="$PROJECT_DIR$/aura/aura.iml" />
       <module fileurl="file://$PROJECT_DIR$/feta/feta.iml" filepath="$PROJECT_DIR$/feta/feta.iml" />
       <module fileurl="file://$PROJECT_DIR$/mish/mish.iml" filepath="$PROJECT_DIR$/mish/mish.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mish-linux/mish-linux.iml" filepath="$PROJECT_DIR$/mish-linux/mish-linux.iml" />
     </modules>
   </component>
 </project>

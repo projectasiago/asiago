@@ -10,3 +10,8 @@ Consisting of these components:
 
  - [Mish](./mish)
  - [Aura](./aura)
+
+## Philosophy
+
+ - Secure by default.
+ - Principle of least privilege.

@@ -4,6 +4,7 @@
     <cargoProject FILE="$PROJECT_DIR$/aura/Cargo.toml" />
     <cargoProject FILE="$PROJECT_DIR$/mish/Cargo.toml" />
     <cargoProject FILE="$PROJECT_DIR$/feta/Cargo.toml" />
+    <cargoProject FILE="$PROJECT_DIR$/mish-linux/Cargo.toml" />
   </component>
   <component name="MarkdownProjectSettings">
     <PreviewSettings splitEditorLayout="SPLIT" splitEditorPreview="PREVIEW" useGrayscaleRendering="false" zoomFactor="1.0" maxImageWidth="0" showGitHubPageIfSynced="false" allowBrowsingInPreview="false" synchronizePreviewPosition="true" highlightPreviewType="NONE" highlightFadeOut="5" highlightOnTyping="true" synchronizeSourcePosition="true">

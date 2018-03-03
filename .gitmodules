@@ -9,3 +9,7 @@
 [submodule "feta"]
 	path = feta
 	url = https://github.com/projectasiago/feta.git
+
+[submodule "mish-linux"]
+	path = mish-linux
+	url = https://github.com/projectasiago/mish-linux.git

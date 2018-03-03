@@ -3,7 +3,8 @@ FROM ubuntu:artful
 ENV RUSTUP_HOME=/usr/local/rustup \
 	CARGO_HOME=/usr/local/cargo \
 	TOOLCHAIN_HOME=/usr/local/toolchain \
-	PATH=/usr/local/cargo/bin:/usr/local/toolchain/usr/bin/:$PATH
+	PATH=/usr/local/cargo/bin:/usr/local/toolchain/usr/bin/:$PATH \
+	TOOLCHAIN=x86_64-unknown-efi
 
 RUN apt-get update && apt-get -y install curl gcc make xz-utils mtools gosu
 RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y --no-modify-path
