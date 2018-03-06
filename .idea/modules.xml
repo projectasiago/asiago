@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/feta/feta.iml" filepath="$PROJECT_DIR$/feta/feta.iml" />
       <module fileurl="file://$PROJECT_DIR$/mish/mish.iml" filepath="$PROJECT_DIR$/mish/mish.iml" />
       <module fileurl="file://$PROJECT_DIR$/mish-linux/mish-linux.iml" filepath="$PROJECT_DIR$/mish-linux/mish-linux.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mish-web/mish-web.iml" filepath="$PROJECT_DIR$/mish-web/mish-web.iml" />
     </modules>
   </component>
 </project>

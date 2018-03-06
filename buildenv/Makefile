@@ -11,3 +11,8 @@ x86_64-unknown-efi:
 linux:
 	docker build -t projectasiago/rustbuildenv:linux . -f Dockerfile.linux
 	docker run -it --rm -e LOCAL_UID="$(shell id -u)" -e LOCAL_GID="$(shell id -g)" -v aura-"$(shell id -u)-$(shell id -g)"-cargo:/usr/local/cargo -v $(shell pwd)/..:/usr/src/asiago -w /usr/src/asiago projectasiago/rustbuildenv:linux bash
+
+.PHONY:
+wasm32-unknown-emscripten:
+	docker build -t projectasiago/rustbuildenv:wasm32-unknown-emscripten . -f Dockerfile.wasm32-unknown-emscripten
+	docker run -it --rm -e LOCAL_UID="$(shell id -u)" -e LOCAL_GID="$(shell id -g)" -v aura-"$(shell id -u)-$(shell id -g)"-cargo:/usr/local/cargo -v $(shell pwd)/..:/usr/src/asiago -w /usr/src/asiago projectasiago/rustbuildenv:wasm32-unknown-emscripten bash

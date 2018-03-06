@@ -13,3 +13,7 @@
 [submodule "mish-linux"]
 	path = mish-linux
 	url = https://github.com/projectasiago/mish-linux.git
+
+[submodule "mish-web"]
+	path = mish-web
+	url = https://github.com/projectasiago/mish-web.git
