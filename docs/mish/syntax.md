@@ -109,3 +109,21 @@ false | false == false
 !true == false
 true! == false
 ```
+
+### Expression Operator Precedence
+
+Items on the same level evaluate left to right.
+
+`? :`
+`&`, `|`, `^` - these are logical, not bitwise; &=and, |=or, ^=xor
+`==`, `!=`
+`<`, `>`, `<=`, `>=`, `< <`, `< <=`, `<= <`, `<= <=`
+`+`, `-`
+`*`, `/`, `%`
+`**`, `//`
+`&&`, `||`, `^^`, `<<`, `>>` - &&=and, ||=or, ^^=xor
+`!`, `~`, `+`, `-` - !=logical not, ~=bitwise not
+`[]`, `:` - :=function call
+`()` and literals
+
+Note that you can't use bitwise operators on booleans and logical operators on numbers. The operators are separate in order to differentiate between precedence levels. While these precedence levels *could* be inferred based on the type of the input, that's too complicated.

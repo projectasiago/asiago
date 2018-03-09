@@ -7,5 +7,3 @@ title: Aura
 ## Aura
 
 [GitHub](https://github.com/projectasiago/aura)
-
-Aura!

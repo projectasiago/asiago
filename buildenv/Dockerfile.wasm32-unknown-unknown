@@ -4,7 +4,7 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 	CARGO_HOME=/usr/local/cargo \
 	TOOLCHAIN_HOME=/usr/local/toolchain \
 	PATH=/usr/local/cargo/bin:$PATH \
-	TOOLCHAIN=wasm32-unknown-emscripten
+	TOOLCHAIN=wasm32-unknown-unknown
 
 RUN apt-get update && apt-get -y install curl gcc make xz-utils mtools gosu python git
 RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y --no-modify-path
