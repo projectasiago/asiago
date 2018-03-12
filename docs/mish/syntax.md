@@ -127,3 +127,71 @@ Items on the same level evaluate left to right.
 `()` and literals
 
 Note that you can't use bitwise operators on booleans and logical operators on numbers. The operators are separate in order to differentiate between precedence levels. While these precedence levels *could* be inferred based on the type of the input, that's too complicated.
+
+### Functions
+
+```
+fn hello: Integer -> String @{
+    return @.toString()
+}
+
+String x = hello: 5
+```
+
+The syntax of the function is like so:
+
+```
+fn <function name>: <input type> -> <optional output type> @{ <function body> }
+```
+
+Functions can be called like so:
+
+```
+<function name>: <input value>
+```
+
+For void-input functions, you can do this:
+
+```
+fn generate:() -> String @{
+    return "Hello, World!"
+}
+String x = generate:()
+```
+
+If you want to store a function in a variable (sometimes called a closure or a lambda), you can do this:
+
+```
+Function<Input, Output> func = @{ ... }
+```
+
+### Guarentees
+
+Guarentees are things that make it possible to assert some sort of guarentee about the state of a system. They're meerly a flag that propogates through the call stack.
+
+```
+guarentee PermissionEat;
+```
+
+Usage with functions:
+
+```
+fn eat:() -> () requires PermissionEat @{ ... }
+Requires<Function<Input, Output>, PermissionEat> eat = @{ ... }
+```
+
+Now this means that you won't be able to call the `eat()` function unless you have the `PermissionEat` guarentee.
+
+You can't make something out of nothing, so in order to obtain this guarentee initially, you must specify the things that can grant this guarentee:
+
+```
+guarentee PermissionEat grantedby Society;
+
+class Society {
+    fn doWithEatPermission:Requires<Function<Void, Void>, PermissionEat> @{
+        grant PermissionEat {
+            @()
+        }
+    }
+}
+```

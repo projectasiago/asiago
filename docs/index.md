@@ -20,11 +20,19 @@ Files. Ugh, files! The unsafe tree of objects that anyone can edit. Junk! Say yo
 
 A worse situation exists with networking. Say you have a REST API. Your clients give you some data, but first, you must validate it. And if it doesn't pass validation, you're suppose to construct a reasonable error message and send it back to the client. Everytime you want to add a new feature, you've got to define this interface, add checks to everything, add documentation, marshall and unmarshall the data, and add nice error messages. It's just a pain and is deterrant to progress. Imagine if you could just define a regular function on the server with a bunch of constraints and be able to be done with it? That would be AWESOME and is exactly what works by default with Asiago. Note that this does currently exist with various things like Google's Protocol Buffers and Apache Thrift.
 
-Now a lot of these points I'm trying to make do have workarounds or libraries that fix or make it easier to deal with. But that's just it, a "workaround". What Asiago and Mish will do is have an entire system that has all this functionality built in. Syntactical sugar and everything. Developers won't have to discover these fixes, but rather be presented with them from the start. Software will just work.
+Now a lot of these points I'm trying to make do have workarounds or libraries that fix or make it easier to deal with. But that's just it, a "workaround". Asiago will be an entire system where all this functionality built in. Syntactical sugar and everything. Developers won't have to discover these fixes, but rather be presented with them from the start. Software will just work.
+
+## But won't this constrain what developers can do?
+
+Yes. Java and Python don't allow direct memory access, is this such a bad thing? No, because 95% of software doesn't need direct memory access. The same philosophy could be applied to any number of things. Files? 95% of software doesn't need to use files and is OK with just persisted state. Native code? 95% of software doesn't need to run at the speed of the processor.
+
+If you really want to do things that Asiago doesn't allow, then go right ahead in your programming language of choice. Don't use Asiago for this particular project because it isn't the right tool for the job. You don't use a hammer to push in a nail just because hammers go bang bang. No, you use hammers because they have a large portion of their mass right above where the nail would be, rendering them an efficient tool for the job. But you wouldn't use a hammer to screw in a screw. If your project falls into the 95% category I'm taking about, you should use Asiago. If it doesn't, then don't.
+
+Asiago does plan on offering a native platform access API for those super-inclined to access the native system. However, this is *highly* suggested against because not all platforms support these native features.
 
 ## Philosophy
 
  - Secure by default.
  - Principle of least privilege.
- - Compile time saftey.
+ - Compile time safety.
  - Sensible defaults.
