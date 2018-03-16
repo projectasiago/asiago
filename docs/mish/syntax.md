@@ -79,7 +79,7 @@ let x: Integer = 5y ?? septillion
 ```
 let hello = "Hello"
 let helloWorld = "$hello World!"
-let helloWorld = "$(hello + " World!)"
+let helloWorld = "$(hello + " World!")"
 ```
 
 Escape characters:
@@ -114,17 +114,17 @@ true! == false
 
 Items on the same level evaluate left to right.
 
-`? :`
-`&`, `|`, `^` - these are logical, not bitwise; &=and, |=or, ^=xor
-`==`, `!=`
-`<`, `>`, `<=`, `>=`, `< <`, `< <=`, `<= <`, `<= <=`
-`+`, `-`
-`*`, `/`, `%`
-`**`, `//`
-`&&`, `||`, `^^`, `<<`, `>>` - &&=and, ||=or, ^^=xor
-`!`, `~`, `+`, `-` - !=logical not, ~=bitwise not
-`[]`, `:` - :=function call
-`()` and literals
+ - `? :`
+ - `&`, `|`, `^` - these are logical, not bitwise; &=and, |=or, ^=xor
+ - `==`, `!=`
+ - `<`, `>`, `<=`, `>=`, `< <`, `< <=`, `<= <`, `<= <=`
+ - `+`, `-`
+ - `*`, `/`, `%`
+ - `**`, `//`
+ - `&&`, `||`, `^^`, `<<`, `>>` - &&=and, ||=or, ^^=xor
+ - `!`, `~`, `+`, `-` - !=logical not, ~=bitwise not
+ - `[]`, `:` - :=function call
+ - `()` and literals
 
 Note that you can't use bitwise operators on booleans and logical operators on numbers. The operators are separate in order to differentiate between precedence levels. While these precedence levels *could* be inferred based on the type of the input, that's too complicated.
 
@@ -135,14 +135,16 @@ fn hello: Integer -> String @{
     return @.toString()
 }
 
-String x = hello: 5
+let x: String = hello: 5
 ```
 
 The syntax of the function is like so:
 
 ```
-fn <function name>: <input type> -> <optional output type> @{ <function body> }
+fn <function name>: <input type> [ -> <output type> ] @{ <function body> }
 ```
+
+Note that unlike most other languages, Mish functions only accept one input parameter. This parameter is not named and is referenced by the `@` symbol.
 
 Functions can be called like so:
 
@@ -156,42 +158,87 @@ For void-input functions, you can do this:
 fn generate:() -> String @{
     return "Hello, World!"
 }
-String x = generate:()
+let x: String = generate:()
 ```
 
 If you want to store a function in a variable (sometimes called a closure or a lambda), you can do this:
 
 ```
-Function<Input, Output> func = @{ ... }
+let func: Input -> Output = @{ ... }
 ```
 
-### Guarentees
+### Guarantees
 
-Guarentees are things that make it possible to assert some sort of guarentee about the state of a system. They're meerly a flag that propogates through the call stack.
+Guarantees are things that make it possible to assert some sort of guarantee about the state of a system. They're merely a flag that propagates through the call stack.
 
 ```
-guarentee PermissionEat;
+guarantee PermissionEat
 ```
 
 Usage with functions:
 
 ```
-fn eat:() -> () requires PermissionEat @{ ... }
-Requires<Function<Input, Output>, PermissionEat> eat = @{ ... }
+fn eat:Output -> Output requires PermissionEat @{ ... }
+let eat: Input -> Output requires PermissionEat = @{ ... }
 ```
 
-Now this means that you won't be able to call the `eat()` function unless you have the `PermissionEat` guarentee.
+Now this means that you won't be able to call the `eat()` function unless you have the `PermissionEat` guarantee.
 
-You can't make something out of nothing, so in order to obtain this guarentee initially, you must specify the things that can grant this guarentee:
+You can't make something out of nothing, so in order to obtain this guarantee initially, you must specify the things that can grant this guarantee:
 
 ```
-guarentee PermissionEat grantedby Society;
+guarantee PermissionEat grantedby Society ?? give all of Society rights to grant the permission
+guarantee PermissionEat grantedby Society::doWithEatPermission ?? give only the doWithEatPermission function rights to grant the permission
+guarantee PermissionEat grantedby Society* ?? give all of Society and it's sub-classes rights to grant the permission
 
 class Society {
-    fn doWithEatPermission:Requires<Function<Void, Void>, PermissionEat> @{
+    fn doWithEatPermission:(() -> () requires PermissionEat) -> () @{
         grant PermissionEat {
             @()
         }
     }
+}
+```
+
+### Bindings
+
+Mish supports binding an expression to a variable. This means that the variable will always contain the contents of the expression.
+
+```
+let x = 5
+let y := x
+x = 10
+assert y == 10
+```
+
+Use equal signs to indicate that we should capture the contents of the variable at this moment and not watch for changes.
+
+```
+let x = 5
+let y := =x + 1
+assert y == 6
+x = 10
+assert y == 6
+```
+
+Watch changes to a variable.
+
+```
+let x = 5
+watch x @{
+	assert @.old == 5
+	assert @.new == 10
+}
+x = 10
+```
+
+Watch changes to a variable and run the listener now.
+
+```
+let x = 5
+watchnow x @{
+	assert @.old == 5
+	assert @.new == 5
+	assert @.first ?? @.first will be true on the first time this listener is called
 }
 ```
