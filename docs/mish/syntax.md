@@ -131,7 +131,7 @@ Note that you can't use bitwise operators on booleans and logical operators on n
 ### Functions
 
 ```
-fn hello: Integer -> String @{
+fn hello: Integer -> String {
     return @.toString()
 }
 
@@ -141,7 +141,7 @@ let x: String = hello: 5
 The syntax of the function is like so:
 
 ```
-fn <function name>: <input type> [ -> <output type> ] @{ <function body> }
+fn <function name>: <input type> [ -> <output type> ] { <function body> }
 ```
 
 Note that unlike most other languages, Mish functions only accept one input parameter. This parameter is not named and is referenced by the `@` symbol.
@@ -155,7 +155,7 @@ Functions can be called like so:
 For void-input functions, you can do this:
 
 ```
-fn generate:() -> String @{
+fn generate:() -> String {
     return "Hello, World!"
 }
 let x: String = generate:()
@@ -167,36 +167,117 @@ If you want to store a function in a variable (sometimes called a closure or a l
 let func: Input -> Output = @{ ... }
 ```
 
-### Guarantees
+### Permission
 
-Guarantees are things that make it possible to assert some sort of guarantee about the state of a system. They're merely a flag that propagates through the call stack.
+Declare the permission like this:
 
 ```
-guarantee PermissionEat
+pemission PEat
 ```
 
 Usage with functions:
 
 ```
-fn eat:Output -> Output requires PermissionEat @{ ... }
-let eat: Input -> Output requires PermissionEat = @{ ... }
+fn eat:Output -> Output requires PEat { ... }
+let eat: Input -> Output requires PEat = { ... }
 ```
 
-Now this means that you won't be able to call the `eat()` function unless you have the `PermissionEat` guarantee.
-
-You can't make something out of nothing, so in order to obtain this guarantee initially, you must specify the things that can grant this guarantee:
+This means that you won't be able to call `eat` unless you have the `PEat` permission.
 
 ```
-guarantee PermissionEat grantedby Society ?? give all of Society rights to grant the permission
-guarantee PermissionEat grantedby Society::doWithEatPermission ?? give only the doWithEatPermission function rights to grant the permission
-guarantee PermissionEat grantedby Society* ?? give all of Society and it's sub-classes rights to grant the permission
-
 class Society {
-    fn doWithEatPermission:(() -> () requires PermissionEat) -> () @{
-        grant PermissionEat {
-            @()
-        }
-    }
+	permission PEat ?? new permission PEat is declared and is granted to surrounding context
+	delegate PEat to Human ?? Human now has the PEat permission. If it didn't ask for it via haspermission, this would be an error.
+	
+	fn obtainPermission:{ password: String; task: () -> () requires PEat } -> Boolean {
+		if @.password == "1234" {
+			@:()
+			return false
+		} else {
+			return true
+		}
+	}
+	
+	fn doSomeEating:() -> () requires PEat { ... }
+	
+	fn secretFunction:() -> () {
+		?? Can call doSomeEating fine without requireing the caller of secretFunction to first obtain the PEat permission.
+		?? This is essentally a security hole in the Society class.
+		doSomeEating:()
+	}
+}
+
+let society = Society {}
+
+class Human haspermission PEat { ?? if we weren't delegated PEat, this would be an error
+	fn go:() -> () {
+		society.doSomeEating:() ?? Human was granted PEat so we are allowed to call this function
+	}
+}
+
+?? dynamic permission obtaining
+
+let failed = society.obtainPermission: {
+	password: "1234"
+	task: @ requires Society::PEat {
+		society.doSomeEating:()
+	}
+}
+
+if failed {
+	?? handle permission failure
+}
+```
+
+### Constraints
+
+Constraints allow code to define a range of values numbers can be in.
+
+```
+let a: Num(min: 5, max: 10) = 7
+let b = a ?? b implicitly has type: Num(min: 5, max: 10)
+let c = b + 1 ?? c implicitly has type: Num(min: 6, max: 11)
+```
+
+#### How?
+
+Implicit types. Mish will generate implicit types for variables. If you specify the type to be `Num` but only assign a 5 to it, Mish will implicitly set the type to be `Num(min:5, max:5)`. If you call a function, Mish will go into this function and generate implicit types based on the input arguments and produce a more constrainted, implicit, return type than what the function was originally declared to return.
+
+```
+?? ...continuing from above
+
+fn add:(Num, Num) -> Num {
+	return @[0] + @[1]
+}
+
+let d = add(a, c) ?? add:[0] implicitly has type: Num(min:5,max:10), add:[1] implicitly has type: Num(min:6,max:11), add:-> implicitly has type: Num(min:11,max:21)
+
+let x = 5 ?? Num(min:5,max:5)
+for i in [0..2] {
+	x++
+}
+?? here, x is Num(min:8,max:8)
+
+let input: Num(min0,max:infinity) = input:() ?? validation not shown
+for i in [0..input] {
+	x++
+}
+?? here, x is Num(min:8,max:infinity)
+```
+
+As these loops get more complicated, it will start to require some calculus to determine the end-behavior of these sections of code. Yay!
+
+### Variable types
+
+```
+let a = 5
+a = () ?? compile-time error
+
+let b: Integer | () = 5
+b = () ?? ok!
+
+if b != () {
+	?? b is implicitly an Integer
 }
 ```
 
