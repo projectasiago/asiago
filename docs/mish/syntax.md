@@ -57,7 +57,7 @@ documentation block comment
 ### Literals
 
 ```
-let x: Void = ()
+let x: () = ()
 let x: String = "text"
 let x: Integer = 15 ?? decimal
 let x: Integer = 0xF ?? hexadecimal
@@ -128,11 +128,87 @@ Items on the same level evaluate left to right.
 
 Note that you can't use bitwise operators on booleans and logical operators on numbers. The operators are separate in order to differentiate between precedence levels. While these precedence levels *could* be inferred based on the type of the input, that's too complicated.
 
+### Collections
+
+```
+let list: []String = []
+let map: [Integer]String = []
+
+list << "cat"
+assert list[0] == "cat"
+```
+
+### Control Flow
+
+#### Branching
+```
+let x = 10
+if x == 10 {
+	?? this will execute
+} else {
+	?? this will not
+}
+
+match x {
+	10 -> print: "x is 10"
+	_ -> print: "will never happen"
+}
+```
+
+These statements can also be used as expressions:
+```
+let x = 10
+let y = if x == 10 {
+	:: 5
+} else {
+	:: 1
+}
+assert y == 5
+
+y = match x {
+	10 -> 5
+	_ -> 1
+}
+assert y == 5
+```
+
+```
+let y = if c {
+	print: "hi" ?? compile-time error: no yielding
+}
+```
+
+#### Looping
+```
+loop {
+	?? this will loop forever
+}
+
+let cond = true
+while cond {
+	?? this will loop while cond is true
+}
+
+let list = [1]
+each list {
+	assert @ == 1
+}
+
+for list.enumerate:() {
+	assert @.index == 0
+	assert @.item == 1
+}
+```
+
+Using the keyword `break` inside one of these loop will exit the loop regardless of the loop condition.
+
+Using the keyword `continue` inside one of these loops will skip to the next iteration.
+
 ### Functions
 
 ```
 fn hello: Integer -> String {
-    return @.toString()
+    :: @.toString()
 }
 
 let x: String = hello: 5
@@ -156,7 +232,7 @@ For void-input functions, you can do this:
 
 ```
 fn generate:() -> String {
-    return "Hello, World!"
+    :: "Hello, World!"
 }
 let x: String = generate:()
 ```
@@ -165,6 +241,48 @@ If you want to store a function in a variable (sometimes called a closure or a l
 
 ```
 let func: Input -> Output = @{ ... }
+```
+
+### Tagging Blocks
+
+You might see that there can be some ambiguity about which block to yield from. This is resolved by tagging.
+
+In this scenario, we demonstrate returning from the function as well as assigning to the `x` variable:
+```
+fn animalFun:Boolean -> String {
+	let x = if @ {
+		:: "cat" ?? x = "cat"
+	} else {
+		:animalFun: "dog" ?? function returns "dog" 
+	}
+	:: x
+}
+```
+
+In this scenario, we demonstrate the same thing, but this time tagging the if statement explicitly.
+```
+fn animalFun2:Boolean -> String {
+	let x = tag ifStatement if @ {
+		:ifStatement: "cat" ?? x = "cat"
+	} else {
+		:animalFun2: "dog" ?? function returns "dog" 
+	}
+	:: x
+}
+```
+
+This becomes more useful when dealing with nested loops:
+```
+tag outer for [1, 2, 3, 4, 5] {
+	let outerVal = @
+	tag inner for [1, 2, 3, 4, 5] {
+		if outerVal = @ {
+			break inner
+		} else {
+			continue outer
+		}
+	}
+}
 ```
 
 ### Permission
@@ -192,9 +310,9 @@ class Society {
 	fn obtainPermission:{ password: String; task: () -> () requires PEat } -> Boolean {
 		if @.password == "1234" {
 			@:()
-			return false
+			:: false
 		} else {
-			return true
+			:: true
 		}
 	}
 	
@@ -323,3 +441,39 @@ watchnow x @{
 	assert @.first ?? @.first will be true on the first time this listener is called
 }
 ```
+
+## Classes
+
+TODO consider Rust-style impl and structs.
+
+All their members are private by default.
+
+```
+class Rectange {
+	pub x: Num
+	pub y: Num
+	pub width: Num
+	pub height: Num
+	
+	pub fn area:() -> Num {
+		:: this.width * this.height
+	}
+}
+```
+
+### Access Levels
+
+ - `piv` - the default access level, only this class can access this member
+ - `sub` - only this class and its sub-classes can access this member
+ - `mod` - only this module can access this member
+ - `pub` - anybody can access this member
+
+You can also set more fine-grained control over who can read/write the value with `com`. In the example below, anybody can read, while only the class itself can write.
+
+```
+class Animal {
+	com(read pub, mut piv) var: Type
+}
+```
+
+### Subclassing
