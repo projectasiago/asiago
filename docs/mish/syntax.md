@@ -444,8 +444,6 @@ watchnow x @{
 
 ## Classes
 
-TODO consider Rust-style impl and structs.
-
 All their members are private by default.
 
 ```
