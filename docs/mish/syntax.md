@@ -167,7 +167,8 @@ assert y == 5
 
 y = match x {
 	10 -> 5
-	_ -> 1
+	20 -> { :: 1 }
+	_ -> { print: @ } ?? compile-time error: no yielding
 }
 assert y == 5
 ```
@@ -208,7 +209,7 @@ Using the keyword `continue` inside one of these loops will skip to the next ite
 
 ```
 fn hello: Integer -> String {
-    :: @.toString()
+	:: @.toString()
 }
 
 let x: String = hello: 5
@@ -232,7 +233,7 @@ For void-input functions, you can do this:
 
 ```
 fn generate:() -> String {
-    :: "Hello, World!"
+	:: "Hello, World!"
 }
 let x: String = generate:()
 ```
@@ -352,14 +353,14 @@ if failed {
 Constraints allow code to define a range of values numbers can be in.
 
 ```
-let a: Num(min: 5, max: 10) = 7
-let b = a ?? b implicitly has type: Num(min: 5, max: 10)
-let c = b + 1 ?? c implicitly has type: Num(min: 6, max: 11)
+let a: Num(min 5, max 10) = 7
+let b = a ?? b implicitly has type: Num(min 5, max 10)
+let c = b + 1 ?? c implicitly has type: Num(min 6, max 11)
 ```
 
 #### How?
 
-Implicit types. Mish will generate implicit types for variables. If you specify the type to be `Num` but only assign a 5 to it, Mish will implicitly set the type to be `Num(min:5, max:5)`. If you call a function, Mish will go into this function and generate implicit types based on the input arguments and produce a more constrainted, implicit, return type than what the function was originally declared to return.
+Implicit types. Mish will generate implicit types for variables. If you specify the type to be `Num` but only assign a 5 to it, Mish will implicitly set the type to be `Num(min 5, max 5)`. If you call a function, Mish will go into this function and generate implicit types based on the input arguments and produce a more constrainted, implicit, return type than what the function was originally declared to return.
 
 ```
 ?? ...continuing from above
@@ -368,19 +369,19 @@ fn add:(Num, Num) -> Num {
 	return @[0] + @[1]
 }
 
-let d = add(a, c) ?? add:[0] implicitly has type: Num(min:5,max:10), add:[1] implicitly has type: Num(min:6,max:11), add:-> implicitly has type: Num(min:11,max:21)
+let d = add(a, c) ?? add:[0] implicitly has type: Num(min 5,max 10), add:[1] implicitly has type: Num(min 6,max 11), add:-> implicitly has type: Num(min 11,max 21)
 
-let x = 5 ?? Num(min:5,max:5)
+let x = 5 ?? Num(min 5,max 5)
 for i in [0..2] {
 	x++
 }
-?? here, x is Num(min:8,max:8)
+?? here, x is Num(min 8,max 8)
 
 let input: Num(min0,max:infinity) = input:() ?? validation not shown
 for i in [0..input] {
 	x++
 }
-?? here, x is Num(min:8,max:infinity)
+?? here, x is Num(min 8,max infinity)
 ```
 
 As these loops get more complicated, it will start to require some calculus to determine the end-behavior of these sections of code. Yay!
@@ -448,13 +449,26 @@ All their members are private by default.
 
 ```
 class Rectange {
-	pub x: Num
-	pub y: Num
-	pub width: Num
-	pub height: Num
+	pub x: Num(min 0, max infinity)
+	pub y: Num(min 0, max infinity)
+	pub width: Num(min 0, max infinity)
+	pub height: Num(min 0, max infinity)
 	
 	pub fn area:() -> Num {
 		:: this.width * this.height
+	}
+}
+```
+
+### Subclassing
+```
+class Animal {
+	pub fn speak:() -> String
+}
+
+class Dog: Animal {
+	pub fn speak:() -> String {
+		:: "Woof!"
 	}
 }
 ```
@@ -463,15 +477,27 @@ class Rectange {
 
  - `piv` - the default access level, only this class can access this member
  - `sub` - only this class and its sub-classes can access this member
- - `mod` - only this module can access this member
+ - `mod` - only this module can access this member (not subclasses)
  - `pub` - anybody can access this member
 
 You can also set more fine-grained control over who can read/write the value with `com`. In the example below, anybody can read, while only the class itself can write.
 
 ```
-class Animal {
+class Something {
 	com(read pub, mut piv) var: Type
 }
 ```
 
-### Subclassing
+## Enums
+```
+enum Operation [
+	Quit,
+	Message String,
+]
+
+let op = ...
+match op {
+	Quit -> { quit:: }
+	Message -> { print: @ }
+}
+```
