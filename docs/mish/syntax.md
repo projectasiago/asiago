@@ -151,7 +151,13 @@ if x == 10 {
 
 match x {
 	10 -> print: "x is 10"
-	_ -> print: "will never happen"
+	_ -> print: "x is something else" ?? in-fact, this will be a compile-time warning since x is always 10
+}
+
+let x = 10
+match typeof x {
+	Integer -> ...
+	_ -> ... ?? compile-time warning: x cannot be anything other than an Integer
 }
 ```
 
@@ -397,6 +403,13 @@ b = () ?? ok!
 
 if b != () {
 	?? b is implicitly an Integer
+}
+
+let x: Value1 | Value2 | Value3 = ...
+match typeof x {
+	Value1 -> ...
+	Value2 -> ...
+	Value3 -> ...
 }
 ```
 
