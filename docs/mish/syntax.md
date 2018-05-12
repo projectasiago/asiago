@@ -517,7 +517,7 @@ class IdDealer {
 }
 ```
 
-Note: there is no "static" variables like there is in Java.
+Note: there is no "static" variables like there is in Java as this would conflict with the idea that modules do not store state.
 
 ### Subclassing
 ```
