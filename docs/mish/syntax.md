@@ -242,6 +242,8 @@ fn generate:() -> String {
 	:: "Hello, World!"
 }
 let x: String = generate:()
+?? or
+x = generate::
 ```
 
 If you want to store a function in a variable (sometimes called a closure or a lambda), you can do this:
@@ -355,8 +357,8 @@ class Society {
 	fn doSomeEating:() -> () requires PEat { ... }
 	
 	fn secretFunction:() -> () {
-		?? Can call doSomeEating fine without requireing the caller of secretFunction to first obtain the PEat permission.
-		?? This is essentally a security hole in the Society class.
+		?? Can call doSomeEating fine without requiring the caller of secretFunction to first obtain the PEat permission.
+		?? This is essentially a security hole in the Society class.
 		doSomeEating:()
 	}
 }
@@ -536,8 +538,10 @@ class Dog: Animal {
 
  - `piv` - the default access level, only this class can access this member
  - `sub` - only this class and its sub-classes can access this member
- - `spc` - only this space can access this member (not subclasses)
+ - `spc` - only this space can access this member (not subclasses if they are in a different space)
+ - `mod` - only this module can access this member (not subclasses if they are in a different module)
  - `pub` - anybody can access this member
+ - `tar(symbol)` - target a specific symbol which has access e.g. `tar(MyClass)`
 
 You can also set more fine-grained control over who can read/write the value with `com`. In the example below, anybody can read, while only the class itself can write.
 
@@ -547,6 +551,21 @@ class Something {
 }
 ```
 
+And you can add two access levels together:
+```
+(tar(MyClass) + tar(OtherClass)) var: Type
+```
+
+|↓ **who can access** - **modifier** →|`piv`|`sub`|`spc`|`mod`|`pub`|`tar` |
+|-------------------------------------|:---:|:---:|:---:|:---:|:---:|:----:|
+|world                                |     |     |     |     |✔    |varies|
+|module                               |     |     |     |✔    |✔    |varies|
+|space                                |     |     |✔    |✔    |✔    |varies|
+|subspace                             |     |     |✔    |✔    |✔    |varies|
+|self                                 |✔    |✔    |✔    |✔    |✔    |✔     |
+|subclass                             |     |✔    |     |     |✔    |varies|
+|subclass (same space)                |     |✔    |✔    |✔    |✔    |varies|
+
 ## Enums
 ```
 enum Operation [
@@ -554,7 +573,7 @@ enum Operation [
 	Message String,
 ]
 
-let op = ...
+let op = Operation.Quit
 match op {
 	Quit -> { quit:: }
 	Message -> { print: @ }
