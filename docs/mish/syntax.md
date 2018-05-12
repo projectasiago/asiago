@@ -265,12 +265,14 @@ Pure functions cannot modify state. They can only take input, generate an output
 
 #### Short Functions
 (for lack of a better name) Short functions are ones which don't allow looping or recursion.
+```
 short fn booleanToString:Boolean -> String {
 	:: match @ {
 		true -> "true"
 		false -> "false"
 	} 
 }
+```
 
 #### Pure Short Functions
 ```
