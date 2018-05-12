@@ -250,6 +250,33 @@ If you want to store a function in a variable (sometimes called a closure or a l
 let func: Input -> Output = @{ ... }
 ```
 
+#### Pure Functions
+Pure functions are marked with the `pure` modifier:
+```
+pure fn add:[]Number -> Number {
+	let result = 0
+	loop @ {
+		result += @
+	}
+	:: result
+}
+```
+Pure functions cannot modify state. They can only take input, generate an output, and call other pure functions. They cannot mutate the input if it is passed by reference. Functions may be marked as pure implicitly.
+
+#### Short Functions
+(for lack of a better name) Short functions are ones which don't allow looping or recursion.
+short fn booleanToString:Boolean -> String {
+	:: match @ {
+		true -> "true"
+		false -> "false"
+	} 
+}
+
+#### Pure Short Functions
+```
+pure short fn xyz:In -> Out { ... }
+```
+
 ### Tagging Blocks
 
 You might see that there can be some ambiguity about which block to yield from. This is resolved by tagging.
@@ -415,7 +442,7 @@ match typeof x {
 
 ### Bindings
 
-Mish supports binding an expression to a variable. This means that the variable will always contain the contents of the expression.
+Mish supports binding an expression to a variable. This means that the variable will always contain the contents of the expression. Any function calls in these expressions must be pure and functions.
 
 ```
 let x = 5
@@ -434,7 +461,7 @@ x = 10
 assert y == 6
 ```
 
-Watch changes to a variable.
+Watch changes to a variable. Any function calls in watchers must be short functions.
 
 ```
 let x = 5
@@ -456,6 +483,8 @@ watchnow x @{
 }
 ```
 
+Note that expression bindings will evaluate synchronously, whereas watchers will execute asynchronously.
+
 ## Classes
 
 All their members are private by default.
@@ -472,6 +501,21 @@ class Rectange {
 	}
 }
 ```
+
+### Static Variables
+
+When a function is defined inside a class, they are able to store state within the scope of the function.
+```
+class IdDealer {
+	fn newId:() -> Number {
+		static id = 0
+		id++
+		::id
+	}
+}
+```
+
+Note: there is no "static" variables like there is in Java.
 
 ### Subclassing
 ```
@@ -490,7 +534,7 @@ class Dog: Animal {
 
  - `piv` - the default access level, only this class can access this member
  - `sub` - only this class and its sub-classes can access this member
- - `mod` - only this module can access this member (not subclasses)
+ - `spc` - only this space can access this member (not subclasses)
  - `pub` - anybody can access this member
 
 You can also set more fine-grained control over who can read/write the value with `com`. In the example below, anybody can read, while only the class itself can write.
@@ -514,3 +558,117 @@ match op {
 	Message -> { print: @ }
 }
 ```
+
+## Spaces
+```
+space space1 {
+	fn hello:() { ... }
+}
+
+space space2 {
+	fn go:() {
+		space1.hello:()
+	}
+}
+```
+
+Imports bring the given symbol into the scope where the import is (as well as any sub-scopes):
+```
+space space1 {
+	pub let x = 5
+	pub let y = 10
+}
+
+import space1.x
+fn go:() -> () {
+	print: x
+	print: z ?? compile-time error: z is defined below
+	
+	import space1.x as z
+	print: z
+}
+
+space space2 {
+	import space1.y
+}
+
+space space3 {
+	print: y ?? compile-time error...y is only available inside space1 or space2
+}
+```
+
+## Modules
+All modules are pure. They cannot contain any global state. Any state must be stored inside an instance of a class (which this state must be stored elsewhere). All references to state (volatile and not) are stored in the root module.
+
+Modules are referenced by their key and hash code (known collectively as a module identifier or mod ID). The key is the public key of the entity that created and maintains the module. The hash code is, well, the hash of the entire module. When modules are distributed, the mod ID is given out. Each symbol in the module (manifest, space, sub spaces, individual classes, and functions) is signed. When the module (or parts of it) are loaded from an external source, each symbol and its contents are verified against the key. The loading mechanism should be smart enough to only download the symbols that are needed for the thing to function.
+
+Modules cannot reference one another. Here is an example of a plugin-type system.
+
+Interface module:
+```
+?? The plugin uses this to reference the system.
+trait Platform {
+	fn doPlatform:() -> ()
+}
+
+?? The platform uses this to reference the plugin.
+trait Plugin {
+	fn doPlugin:() -> ()
+}
+```
+
+Platform module (depends on the Interface module):
+```
+import mod_interface.{Plugin, Platform}
+fn platformFunction:() -> { ... }
+fn go:() -> () {
+	let platform: Platform = Platform {
+		doPlatform = { platformFunction:() }
+	}
+	let module: Module<Platform, Plugin> = moduleReference:"123ABC" ?? not shown: verifying the module is of type Platform -> Plugin and the potential for the module not existing or not found
+	let plugin: Plugin = module.init: platform
+	plugin.doPlugin:()
+}
+```
+
+In the code above, the function `moduleReference` is something magically provided by the OS which allows downloading modules. This mechanism is up for debate, but will probably be implemented in Mish by the root module.
+
+Plugin module (depends on the Interface module):
+
+```
+import mod_interface.{Plugin, Platform}
+let platform: Platform = @
+:: Plugin {
+	doPlugin = {
+		doSomeStuff:()
+	}
+}
+
+fn doSomeStuff:() -> () {
+	myspace.insideSpace:()
+}
+
+space myspace {
+	fn insideSpace:() -> {
+		...
+	}
+}
+```
+
+### Module dependencies
+What's not shown above is where the mod IDs come into play. When one module wants to depend on another, one way is to directly reference the mod ID using:
+```
+mod 123ABC as mod_interface
+```
+Where `123abcXYZ` is the mod ID (a base-62 encoded version of it) and `mod_interface` is the name given. The name is arbitrary and is the name used to reference the module. Modules must be referenced using only the `mod` statement and cannot be directly referenced (e.g. `123abcXYZ.someFunction:()`).
+
+IDEs may implement a variety of mechanisms to make referencing modules easier for the developer. One example would be the `group:module:version` labeling. There could be services which host mappings between `group:module:version` and the mod ID. In this case, the developer would tell the IDE which modules (using the more readable syntax) to depend on. The IDE will transparently inject `mod` statements into the code.
+
+As an example, lets say the developer depended on `chris13524:maths:1.0.0`. The IDE would lookup the mod ID for this (let's say it's `12AB`) and will prepend the source code with these lines:
+```
+space chris13524 {
+	mod 12AB as maths
+}
+```
+
+Your source file would then have access to the module using `chris13524.maths.sin:10`.
