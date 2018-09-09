@@ -343,43 +343,43 @@ This means that you won't be able to call `eat` unless you have the `PEat` permi
 ```
 class Society {
 	permission PEat ?? new permission PEat is declared and is granted to surrounding context
-	delegate PEat to Human ?? Human now has the PEat permission. If it didn't ask for it via haspermission, this would be an error.
 	
 	fn obtainPermission:{ password: String; task: () -> () requires PEat } -> Boolean {
 		if @.password == "1234" {
-			@:()
+			with PEat { @.task:() } ?? Call needs to be inside a `with` statement for the permissions to leave this context. Detection of this is liberal: any function not defined in this context needs to have a with statement.
 			:: false
 		} else {
 			:: true
 		}
 	}
 	
-	fn doSomeEating:() -> () requires PEat { ... }
+	fn doSomeEating:() -> () requires PEat {
+		?? calling this function requires permission
+	}
 	
 	fn secretFunction:() -> () {
-		?? Can call doSomeEating fine without requiring the caller of secretFunction to first obtain the PEat permission.
-		?? This is essentially a security hole in the Society class.
+		?? calling this function does not require permission, however everything inside here HAS permission
 		doSomeEating:()
+		?? in this case, this is essentially a security hole
 	}
 }
+
+class Dog requirespermission PEat {
+	?? Similar to `haspermission`, everything inside here has access to the PEat permission.
+	?? However, instantiation of this class requires the PEat permission.
+}
+let dogTry = Dog {} ?? Error: needs PEat permission
+
+?? example of dynamic permission obtaining
 
 let society = Society {}
-
-class Human haspermission PEat { ?? if we weren't delegated PEat, this would be an error
-	fn go:() -> () {
-		society.doSomeEating:() ?? Human was granted PEat so we are allowed to call this function
-	}
-}
-
-?? dynamic permission obtaining
-
 let failed = society.obtainPermission: {
 	password: "1234"
 	task: @ requires Society::PEat {
 		society.doSomeEating:()
+		let dog = Dog {}
 	}
 }
-
 if failed {
 	?? handle permission failure
 }
