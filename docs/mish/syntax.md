@@ -386,7 +386,7 @@ let failed = society.obtainPermission: {
 	task: @ requires Society::PEat {
 		society.doSomeEating:()
 		X::func:()
-		let dog = Dog {}
+		let dog = Dog {} ?? passing this reference outside this scope requires a `with` statement
 	}
 }
 if failed {
