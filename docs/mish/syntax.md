@@ -364,11 +364,18 @@ class Society {
 	}
 }
 
-class Dog requirespermission PEat {
+class Dog requires PEat {
 	?? Similar to `haspermission`, everything inside here has access to the PEat permission.
 	?? However, instantiation of this class requires the PEat permission.
 }
 let dogTry = Dog {} ?? Error: needs PEat permission
+
+space X requires PEat {
+	fn func:() -> ()  {
+		?? has PEat permission
+	}
+}
+X::func:() ?? Error needs PEat permission
 
 ?? example of dynamic permission obtaining
 
@@ -378,6 +385,7 @@ let failed = society.obtainPermission: {
 	task: @ requires Society::PEat {
 		society.doSomeEating:()
 		let dog = Dog {}
+		X::func:()
 	}
 }
 if failed {
