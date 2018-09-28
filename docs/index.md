@@ -4,7 +4,7 @@ title: Asiago
 
 View the source on [GitHub](https://github.com/projectasiago/asiago)!
  
-Project Asiago's goal is to scrap much of the modern broken system and rebuild it from the ground up. Why? Because it allows us to forget about all the backwards compatiblity with eisting hardware and software and design a more thought-out system.
+Project Asiago's goal is to scrap much of the modern broken system and rebuild it from the ground up. Why? Because it allows us to forget about all the backwards compatiblity with existing hardware and software and design a more thought-out system.
 
 ## Examples of #BrokenSystem
 
