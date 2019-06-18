@@ -4,9 +4,9 @@ title: Mish Syntax
 
 [back](./)
 
-## Mish Syntax
+## Basic Syntax
 
-Mish syntax here.
+This section contains the basic way Mish code is written including variables, control flow, and functions. See the "Advanced Syntax" section for the interesting stuff.
 
 ### Variables
 
@@ -323,7 +323,111 @@ tag outer for [1, 2, 3, 4, 5] {
 }
 ```
 
-### Permission
+## Advanced Syntax
+
+Anyone can change the way variables are declared, but here is the stuff stuff that is actually interesting.
+
+### Constraints
+
+Constraints allow code to define a range of values numbers can be in.
+
+```
+let a: Num(min 5, max 10) = 7
+let b = a ?? b implicitly has type: Num(min 5, max 10)
+let c = b + 1 ?? c implicitly has type: Num(min 6, max 11)
+```
+
+#### How?
+
+Implicit types. Mish will generate implicit types for variables. If you specify the type to be `Num` but only assign a 5 to it, Mish will implicitly set the type to be `Num(min 5, max 5)`. If you call a function, Mish will go into this function and generate implicit types based on the input arguments and produce a more constrainted, implicit, return type than what the function was originally declared to return.
+
+```
+?? ...continuing from above
+
+fn add:(Num, Num) -> Num {
+	return @[0] + @[1]
+}
+
+let d = add(a, c) ?? add:[0] implicitly has type: Num(min 5,max 10), add:[1] implicitly has type: Num(min 6,max 11), add:-> implicitly has type: Num(min 11,max 21)
+
+let x = 5 ?? Num(min 5,max 5)
+for i in [0..2] {
+	x++
+}
+?? here, x is Num(min 8,max 8)
+
+let input: Num(min0,max:infinity) = input:() ?? validation not shown
+for i in [0..input] {
+	x++
+}
+?? here, x is Num(min 8,max infinity)
+```
+
+As these loops get more complicated, it will start to require some calculus to determine the end-behavior of these sections of code. Yay!
+
+### Classes
+
+All their members are private by default.
+
+```
+class Rectange {
+	pub x: Num(min 0, max infinity)
+	pub y: Num(min 0, max infinity)
+	pub width: Num(min 0, max infinity)
+	pub height: Num(min 0, max infinity)
+	
+	pub fn area:() -> Num {
+		:: this.width * this.height
+	}
+}
+```
+
+### Subclassing
+```
+class Animal {
+	pub fn speak:() -> String
+}
+
+class Dog: Animal {
+	pub fn speak:() -> String {
+		:: "Woof!"
+	}
+}
+```
+
+### Access Levels
+
+ - `piv` - the default access level, only this class can access this member
+ - `sub` - only this class and its sub-classes can access this member
+ - `spc` - only this space can access this member (not subclasses if they are in a different space)
+ - `mod` - only this module can access this member (not subclasses if they are in a different module)
+ - `pub` - anybody can access this member
+ - `tar(symbol)` - target a specific symbol which has access e.g. `tar(MyClass)`
+
+You can also set more fine-grained control over who can read/write the value with `com`. In the example below, anybody can read, while only the class itself can write.
+
+```
+class Something {
+	com(read pub, mut piv) var: Type
+}
+```
+
+And you can add two access levels together:
+```
+(tar(MyClass) + tar(OtherClass)) var: Type
+```
+
+|↓ **who can access** - **modifier** →|`piv`|`sub`|`spc`|`mod`|`pub`|`tar` |
+|-------------------------------------|:---:|:---:|:---:|:---:|:---:|:----:|
+|world                                |     |     |     |     |✔    |varies|
+|module                               |     |     |     |✔    |✔    |varies|
+|space                                |     |     |✔    |✔    |✔    |varies|
+|subspace                             |     |     |✔    |✔    |✔    |varies|
+|self                                 |✔    |✔    |✔    |✔    |✔    |✔     |
+|subclass                             |     |✔    |     |     |✔    |varies|
+|subclass (same space)                |     |✔    |✔    |✔    |✔    |varies|
+
+### Permissions
 
 Declare the permission like this:
 
@@ -382,8 +486,8 @@ let dogTry = Dog {} ?? Error: needs PEat permission
 
 let society = Society {}
 let failed = society.obtainPermission: {
-	password: "1234"
-	task: @ requires Society::PEat {
+	password = "1234"
+	task = @ requires Society::PEat {
 		society.doSomeEating:()
 		X::func:()
 		let dog = Dog {} ?? passing this reference outside this scope requires a `with` statement
@@ -394,44 +498,6 @@ if failed {
 }
 ```
 
-### Constraints
-
-Constraints allow code to define a range of values numbers can be in.
-
-```
-let a: Num(min 5, max 10) = 7
-let b = a ?? b implicitly has type: Num(min 5, max 10)
-let c = b + 1 ?? c implicitly has type: Num(min 6, max 11)
-```
-
-#### How?
-
-Implicit types. Mish will generate implicit types for variables. If you specify the type to be `Num` but only assign a 5 to it, Mish will implicitly set the type to be `Num(min 5, max 5)`. If you call a function, Mish will go into this function and generate implicit types based on the input arguments and produce a more constrainted, implicit, return type than what the function was originally declared to return.
-
-```
-?? ...continuing from above
-
-fn add:(Num, Num) -> Num {
-	return @[0] + @[1]
-}
-
-let d = add(a, c) ?? add:[0] implicitly has type: Num(min 5,max 10), add:[1] implicitly has type: Num(min 6,max 11), add:-> implicitly has type: Num(min 11,max 21)
-
-let x = 5 ?? Num(min 5,max 5)
-for i in [0..2] {
-	x++
-}
-?? here, x is Num(min 8,max 8)
-
-let input: Num(min0,max:infinity) = input:() ?? validation not shown
-for i in [0..input] {
-	x++
-}
-?? here, x is Num(min 8,max infinity)
-```
-
-As these loops get more complicated, it will start to require some calculus to determine the end-behavior of these sections of code. Yay!
-
 ### Variable types
 
 ```
@@ -439,143 +505,35 @@ let a = 5
 a = () ?? compile-time error
 
 let b: Integer | () = 5
-b = () ?? ok!
+b = () ?? ok
 
 if b != () {
 	?? b is implicitly an Integer
 }
 
-let x: Value1 | Value2 | Value3 = ...
+let x: Type1 | Type2 | Type3 = ...
 match typeof x {
-	Value1 -> ...
-	Value2 -> ...
-	Value3 -> ...
+	Type1 -> ...
+	Type2 -> ...
+	Type3 -> ...
 }
 ```
 
-### Bindings
+### Instance-scoped Variables
 
-Mish supports binding an expression to a variable. This means that the variable will always contain the contents of the expression. Any function calls in these expressions must be pure and functions.
+All this is is a property of the class that is scoped to only that function.
 
-```
-let x = 5
-let y := x
-x = 10
-assert y == 10
-```
-
-Use equal signs to indicate that we should capture the contents of the variable at this moment and not watch for changes.
-
-```
-let x = 5
-let y := =x + 1
-assert y == 6
-x = 10
-assert y == 6
-```
-
-Watch changes to a variable. Any function calls in watchers must be short functions.
-
-```
-let x = 5
-watch x @{
-	assert @.old == 5
-	assert @.new == 10
-}
-x = 10
-```
-
-Watch changes to a variable and run the listener now.
-
-```
-let x = 5
-watchnow x @{
-	assert @.old == 5
-	assert @.new == 5
-	assert @.first ?? @.first will be true on the first time this listener is called
-}
-```
-
-Note that expression bindings will evaluate synchronously, whereas watchers will execute asynchronously.
-
-## Classes
-
-All their members are private by default.
-
-```
-class Rectange {
-	pub x: Num(min 0, max infinity)
-	pub y: Num(min 0, max infinity)
-	pub width: Num(min 0, max infinity)
-	pub height: Num(min 0, max infinity)
-	
-	pub fn area:() -> Num {
-		:: this.width * this.height
-	}
-}
-```
-
-### Static Variables
-
-When a function is defined inside a class, they are able to store state within the scope of the function.
 ```
 class IdDealer {
 	fn newId:() -> Number {
-		static id = 0
+		leti id = 0
 		id++
 		::id
 	}
 }
 ```
 
-Note: there is no "static" variables like there is in Java as this would conflict with the idea that modules do not store state.
-
-### Subclassing
-```
-class Animal {
-	pub fn speak:() -> String
-}
-
-class Dog: Animal {
-	pub fn speak:() -> String {
-		:: "Woof!"
-	}
-}
-```
-
-### Access Levels
-
- - `piv` - the default access level, only this class can access this member
- - `sub` - only this class and its sub-classes can access this member
- - `spc` - only this space can access this member (not subclasses if they are in a different space)
- - `mod` - only this module can access this member (not subclasses if they are in a different module)
- - `pub` - anybody can access this member
- - `tar(symbol)` - target a specific symbol which has access e.g. `tar(MyClass)`
-
-You can also set more fine-grained control over who can read/write the value with `com`. In the example below, anybody can read, while only the class itself can write.
-
-```
-class Something {
-	com(read pub, mut piv) var: Type
-}
-```
-
-And you can add two access levels together:
-```
-(tar(MyClass) + tar(OtherClass)) var: Type
-```
-
-|↓ **who can access** - **modifier** →|`piv`|`sub`|`spc`|`mod`|`pub`|`tar` |
-|-------------------------------------|:---:|:---:|:---:|:---:|:---:|:----:|
-|world                                |     |     |     |     |✔    |varies|
-|module                               |     |     |     |✔    |✔    |varies|
-|space                                |     |     |✔    |✔    |✔    |varies|
-|subspace                             |     |     |✔    |✔    |✔    |varies|
-|self                                 |✔    |✔    |✔    |✔    |✔    |✔     |
-|subclass                             |     |✔    |     |     |✔    |varies|
-|subclass (same space)                |     |✔    |✔    |✔    |✔    |varies|
-
-## Enums
+### Enums
 ```
 enum Operation [
 	Quit,
@@ -583,13 +541,17 @@ enum Operation [
 ]
 
 let op = Operation.Quit
+op = Message "Hello, world!" ?? enum inferred, provide value
 match op {
 	Quit -> { quit:: }
 	Message -> { print: @ }
 }
 ```
 
-## Spaces
+### Spaces
+
+Namespaces. Can be nested. Simple as that.
+
 ```
 space space1 {
 	fn hello:() { ... }
@@ -597,7 +559,7 @@ space space1 {
 
 space space2 {
 	fn go:() {
-		space1.hello:()
+		space1::hello:()
 	}
 }
 ```
@@ -627,7 +589,99 @@ space space3 {
 }
 ```
 
-## Modules
+### Services
+
+Perhapse the most important part of Mish is services. All written code is executed inside a service.
+
+There are two types of services: syncronous and asynchronous. Sync services behave very similarly to a function: one input yields one output and it is returned to the one calling it. Async services on the other hand are different. They can have any number of inputs and any number of outputs. These inputs and outputs are stored in queues.
+
+TODO: Do sync services have any use? Maybe their need is for databases?
+
+```
+sync service MySyncService(Input)(Output) {
+    fn exec: Input -> Output { ?? all services must contain an exec function
+        
+    }
+}
+
+async service MyAsyncService(input1: Input1, input2: Input2)(output1: Output1, output2: Output2) {
+    fn exec:() { ?? unlike sync services, async service exec functions do not accept any input or output
+        const input1 = take input1 ?? take one Input1
+        const input2 = take input2 ?? take one Input2
+	?? do some processing
+	const val1 = ...
+	const val2 = ...
+	put output1 val1
+	put output2 val2
+    }
+}
+```
+
+### State
+
+Each service gets its own "database" to store state in.
+
+Collections are actually really special, and here's where they show their light. See "Advanced Collections" for more info there.
+
+Async services maintain their input/output queues as state. When a service is stopped before its `exec` function is complete, any inputs it took will be restored (i.e. they are never really taken until the function completes).
+
+```
+... service MyService(...)(...)(data: Data) {
+    fn exec: ... {
+        data.singleton = "content"
+	
+	data.values << Person { firstName = "Chris"; lastName = "Smith" }
+	const firstChris = data.values.findFirst:{ firstName = "Chris" }
+	const allChrisSmiths = data.values.findAll:{ firstName = "Chris"; lastName = "Smith }
+	const allChrisOrSmiths = data.values.findAll:{ firstName = "Chris" } | { lastName = "Smith }
+	
+	firstChris.lastName = "Jones"
+	data.values.update: firstChris
+    }
+}
+
+class Data {
+    pub singleton: String = "initial" ?? e.g. you might store user settings in here
+    pub values: []String ?? your classic table of values
+    pub people: []Person
+}
+
+class Person {
+    pub firstName: String
+    pub lastName: String
+}
+```
+
+TODO: Communication between services.
+
+#### State Migrations
+
+When the database type (or input/output queue type) is modified, there needs to be a way to migrate old data to the new.
+
+Migration code is fed into the runtime separatly from the actual code. When the new code is loaded, it realizes that these types don't match and requires a migration script to proceed. This migration script consists of a function like so:
+
+```
+fn migrate:before::Data -> after::Data { ?? datatypes are prefixed with before:: and after:: to distinguish them. Spaces are included in here if they exist
+    ?? convert before::Data into after::Data and return it
+}
+```
+
+If the migration function is not consistent with the migrations required, the load fails.
+
+### Advanced Collections
+
+TODO: Show how the database collections are implemented. Database collections are lazy.
+
+```
+const list = [1, 2, 3]
+const list = List::lazy:{
+    size = 10
+    producer = @{ <next value> }
+}
+const queue = Queue
+```
+
+### Modules (needs revision)
 All modules are pure. They cannot contain any global state. Any state must be stored inside an instance of a class (which this state must be stored elsewhere). All references to state (volatile and not) are stored in the root module.
 
 Modules are referenced by their key and hash code (known collectively as a module identifier or mod ID). The key is the public key of the entity that created and maintains the module. The hash code is, well, the hash of the entire module. When modules are distributed, the mod ID is given out. Each symbol in the module (manifest, space, sub spaces, individual classes, and functions) is signed. When the module (or parts of it) are loaded from an external source, each symbol and its contents are verified against the key. The loading mechanism should be smart enough to only download the symbols that are needed for the thing to function.
@@ -685,7 +739,7 @@ space myspace {
 }
 ```
 
-### Module dependencies
+#### Module dependencies
 What's not shown above is where the mod IDs come into play. When one module wants to depend on another, one way is to directly reference the mod ID using:
 ```
 mod 123ABC as mod_interface
